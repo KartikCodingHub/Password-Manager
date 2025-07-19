@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credential Manager</title>
+    <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Sofia"> -->
+
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
+
+
+
+
+    <style>
+    body {
+     font-family: "Sofia", sans-serif;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Credential Manager</h1>
+        <div class="form-container">
+            <input type="text" id="website"
+            placeholder="Website name">
+            <input type="password" id="password"
+            placeholder="Password">
+            <br>
+            <button id="add-btn">Add Password</button>
+        </div>
+        <div class="Password-list">
+            <ul id="Password-list"></ul>
+        </div>
+        </div>
+    <div id="custom -popup" class="popup hidden">
+            <div class="popup content ">
+                <div class ="popup-message"></div>
+                <div id="popup-input-container"class="hidden">
+                    <input type = "text"
+                    id="popup-input" placeholder="New password">
+                </div>
+                <div class="popup-button">
+                    <button id ="popup-ok">OK</button>
+                    <button id ="popup-cancel" class="hidden">Cancel</button>
+                </div>
+            </div>
+        </div>
+</body>
+</html>
