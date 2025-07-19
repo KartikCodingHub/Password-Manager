@@ -1,94 +1,79 @@
-// Select DOM elements
-const websiteInput = document.getElementById('website');
-const passwordInput = document.getElementById('password');
-const addBtn = document.getElementById('add-btn');
-const passwordList = document.getElementById('Password-list');
+let passwords = JSON.parse(localStorage.getItem("passwords")) || [];
 
-// Load saved passwords on page load
-window.onload = () => {
-    const passwords = JSON.parse(localStorage.getItem('passwords')) || [];
-    passwords.forEach(entry => addToDOM(entry));
-};
-
-// Add new password
-addBtn.addEventListener('click', () => {
-    const website = websiteInput.value.trim();
-    const password = passwordInput.value.trim();
-
-    if (!website || !password) {
-        alert('Both fields are required!');
-        return;
-    }
-
-    const entry = { website, password };
-    saveToLocal(entry);
-    addToDOM(entry);
-
-    websiteInput.value = '';
-    passwordInput.value = '';
-});
-
-// Save to local storage
-function saveToLocal(entry) {
-    const passwords = JSON.parse(localStorage.getItem('passwords')) || [];
-    passwords.push(entry);
-    localStorage.setItem('passwords', JSON.stringify(passwords));
+function saveToLocalStorage() {
+  localStorage.setItem("passwords", JSON.stringify(passwords));
 }
 
-// Add item to the DOM
-function addToDOM({ website, password }) {
-    const li = document.createElement('li');
-    li.innerHTML = `
-        <strong>${website}:</strong> 
-        <span class="password-text">********</span>
-        <span class="actions">
-            <i class="fas fa-eye visibility-toggle"></i>
-            <i class="fas fa-copy copy-btn"></i>
-            <i class="fas fa-edit edit-btn"></i>
-            <i class="fas fa-trash delete-btn"></i>
-        </span>
+function renderPasswords() {
+  const list = document.getElementById("passwordList");
+  list.innerHTML = "";
+  passwords.forEach((entry, index) => {
+    const div = document.createElement("div");
+    div.className = "bg-white bg-opacity-80 border border-gray-300 p-4 rounded-lg flex justify-between items-center shadow-md animate-fade-slide";
+    div.innerHTML = `
+      <div>
+        <p class="text-gray-700 font-medium">${entry.website}</p>
+        <p id="pass-${index}" class="text-gray-500 tracking-widest">********</p>
+      </div>
+      <div class="flex space-x-2 text-lg text-gray-600">
+      <!-- View/Hide -->
+      <button onclick="togglePassword(${index})" title="View/Hide" class="hover:text-blue-600 transition">🕶️</button>
+      <!-- Copy --><button onclick="copyPassword(${index})" title="Copy" class="hover:text-green-600 transition">📎</button>
+      <!-- Edit --><button onclick="editPassword(${index})" title="Edit" class="hover:text-yellow-600 transition">🛠️</button>
+      <!-- Delete --><button onclick="deletePassword(${index})" title="Delete" class="hover:text-red-600 transition">🧨</button>
+      </div>
+
     `;
-
-    // Toggle visibility
-    const visibilityIcon = li.querySelector('.visibility-toggle');
-    const passwordText = li.querySelector('.password-text');
-    let isVisible = false;
-    visibilityIcon.addEventListener('click', () => {
-        isVisible = !isVisible;
-        passwordText.textContent = isVisible ? password : '********';
-        visibilityIcon.classList.toggle('fa-eye');
-        visibilityIcon.classList.toggle('fa-eye-slash');
-    });
-
-    // Copy password
-    li.querySelector('.copy-btn').addEventListener('click', () => {
-        navigator.clipboard.writeText(password);
-        alert('Password copied!');
-    });
-
-    // Edit password
-    li.querySelector('.edit-btn').addEventListener('click', () => {
-        const newPass = prompt('Enter new password:', password);
-        if (newPass) {
-            password = newPass;
-            const passwords = JSON.parse(localStorage.getItem('passwords')) || [];
-            const updated = passwords.map(p => {
-                return p.website === website ? { website, password: newPass } : p;
-            });
-            localStorage.setItem('passwords', JSON.stringify(updated));
-            passwordText.textContent = isVisible ? newPass : '********';
-        }
-    });
-
-    // Delete entry
-    li.querySelector('.delete-btn').addEventListener('click', () => {
-        if (confirm('Are you sure you want to delete this password?')) {
-            li.remove();
-            const passwords = JSON.parse(localStorage.getItem('passwords')) || [];
-            const updated = passwords.filter(p => p.website !== website);
-            localStorage.setItem('passwords', JSON.stringify(updated));
-        }
-    });
-
-    passwordList.appendChild(li);
+    list.appendChild(div);
+  });
 }
+
+function addPassword() {
+  const website = document.getElementById("website").value.trim();
+  const password = document.getElementById("password").value.trim();
+  if (website && password) {
+    passwords.push({ website, password });
+    saveToLocalStorage();
+    renderPasswords();
+    document.getElementById("website").value = "";
+    document.getElementById("password").value = "";
+  }
+}
+
+function togglePassword(index) {
+  const span = document.getElementById(`pass-${index}`);
+  if (span.textContent === "********") {
+    span.textContent = passwords[index].password;
+  } else {
+    span.textContent = "********";
+  }
+}
+
+function copyPassword(index) {
+  const tempInput = document.createElement("input");
+  tempInput.value = passwords[index].password;
+  document.body.appendChild(tempInput);
+  tempInput.select();
+  document.execCommand("copy");
+  document.body.removeChild(tempInput);
+  alert("🔒 Password copied to clipboard!");
+}
+
+function editPassword(index) {
+  const newPass = prompt("Enter new password:");
+  if (newPass) {
+    passwords[index].password = newPass;
+    saveToLocalStorage();
+    renderPasswords();
+  }
+}
+
+function deletePassword(index) {
+  if (confirm("Do you really want to delete this password?")) {
+    passwords.splice(index, 1);
+    saveToLocalStorage();
+    renderPasswords();
+  }
+}
+
+renderPasswords();
